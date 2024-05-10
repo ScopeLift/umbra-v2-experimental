@@ -32,4 +32,4 @@ jobs:
       - name: Check
         run: |
           bun install
-          bun run check
+          bun run lint
