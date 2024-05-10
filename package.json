@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "build": "biome check --apply . && next build",
-    "check": "biome check ."
+    "build": "next build",
+    "check": "biome check --apply ."
   },
   "dependencies": {
     "react": "^18",
