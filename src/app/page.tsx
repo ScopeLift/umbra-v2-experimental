@@ -7,11 +7,12 @@ import {
   generateStealthMetaAddressFromSignature,
   generateStealthAddress
 } from '@scopelift/stealth-address-sdk';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui';
 import type {
   EthAddress,
   HexString
 } from '@scopelift/stealth-address-sdk/dist/utils/crypto/types';
+import ConnectViaWalletConnect from '@/components/connect-via-walletconnect';
 
 export default function Home() {
   const chainId = useChainId();
@@ -68,6 +69,12 @@ export default function Home() {
           ) : (
             <div className="mt-8">
               Click Auth to generate Stealth Meta-Address
+            </div>
+          )}
+
+          {stealthAddress && (
+            <div className="mt-8">
+              <ConnectViaWalletConnect />
             </div>
           )}
         </div>
