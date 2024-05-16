@@ -1,7 +1,16 @@
-import { useState, type ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { Button, Input } from '@/components/ui';
+import { useWalletConnect } from '@/contexts/walletconnect';
+import type { Address } from 'viem';
 
-const ConnectViaWalletConnect = () => {
+interface ConnectViaWalletConnectProps {
+  stealthAddress: Address;
+}
+
+const ConnectViaWalletConnect = ({
+  stealthAddress
+}: ConnectViaWalletConnectProps) => {
+  const { connect, sessions } = useWalletConnect();
   const [walletConnectURI, setWalletConnectURI] = useState('');
   const [inputIsFocused, setInputIsFocused] = useState(false);
 
@@ -24,9 +33,10 @@ const ConnectViaWalletConnect = () => {
     }
   };
 
-  const handleConnect = () => {
-    console.log('Connecting with URI:', walletConnectURI);
-  };
+  useEffect(() => {
+    if (!walletConnectURI) return;
+    connect({ uri: walletConnectURI, stealthAddress });
+  }, [connect, walletConnectURI, stealthAddress]);
 
   const handleInputFocus = () => setInputIsFocused(true);
   const handleInputBlur = () => setInputIsFocused(false);
@@ -50,6 +60,17 @@ const ConnectViaWalletConnect = () => {
         />
         <Button onClick={handlePasteClick}>Paste</Button>
       </div>
+      <div>Sessions</div>
+      <ul>
+        {sessions.map(session => (
+          <li key={session.topic}>
+            <div>Topic: {session.topic}</div>
+            <div>Name: {session.peer.metadata.name}</div>
+            <div>ChainId: {session.peer.metadata.url}</div>
+            <div>Account: {session.peer.publicKey}</div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
