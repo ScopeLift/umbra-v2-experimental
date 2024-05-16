@@ -41,6 +41,7 @@ type WalletConnectContextType = {
     stealthAddress: Address;
   }) => Promise<void>;
   sessions: SessionTypes.Struct[];
+  setStealthAddress: (stealthAddress: Address) => void;
 };
 
 const WalletConnectContext = createContext<
@@ -144,41 +145,60 @@ export const WalletConnectProvider = ({
         metadata: WALLETCONNECT_APP_METADATA
       });
 
-      wallet.on(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
+      if (wallet.core.relayer.connected) {
+        console.warn('Relay socket is open');
+        setWeb3Wallet(wallet);
+        setSessions(Object.values(wallet.getActiveSessions() || {}));
+        return;
+      }
+
       setWeb3Wallet(wallet);
       setSessions(Object.values(wallet.getActiveSessions() || {}));
+      console.log('WalletConnect initialized');
     } catch (error) {
       console.error('Failed to initialize WalletConnect:', error);
     }
-  }, [handleSessionProposal]);
+  }, []);
 
+  // Handle init
   useEffect(() => {
     initWalletConnect();
+  }, [initWalletConnect]);
+
+  // Handle clean up
+  useEffect(() => {
+    if (!web3Wallet) {
+      console.log('No web3Wallet');
+      return;
+    }
+
+    web3Wallet.on(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
 
     return () => {
       if (web3Wallet) {
         web3Wallet.off(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
       }
     };
-  }, [web3Wallet, handleSessionProposal, initWalletConnect]);
+  }, [web3Wallet, handleSessionProposal]);
 
   const connect = useCallback(
-    async ({
-      uri,
-      stealthAddress
-    }: { uri: string; stealthAddress: Address }) => {
-      setStealthAddress(stealthAddress);
+    async ({ uri }: { uri: string; stealthAddress: Address }) => {
+      if (!web3Wallet) throw new Error('Web3Wallet not initialized in connect');
 
-      if (!web3Wallet) throw new Error('Web3Wallet not initialized');
-
-      await web3Wallet.pair({ uri });
+      try {
+        await web3Wallet.pair({ uri });
+      } catch (error) {
+        console.log('pairing error', error);
+      }
       setSessions(getActiveSessions());
     },
     [web3Wallet, getActiveSessions]
   );
 
   return (
-    <WalletConnectContext.Provider value={{ connect, sessions }}>
+    <WalletConnectContext.Provider
+      value={{ connect, sessions, setStealthAddress }}
+    >
       {children}
     </WalletConnectContext.Provider>
   );

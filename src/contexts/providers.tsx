@@ -16,7 +16,7 @@ const { wallets } = getDefaultWallets();
 
 const config = getDefaultConfig({
   appName: 'RainbowKit demo',
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || '',
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '',
   wallets: [...wallets],
   chains: [sepolia],
   ssr: true

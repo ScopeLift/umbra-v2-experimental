@@ -2,7 +2,7 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState } from 'react';
-import { useChainId, useSignMessage } from 'wagmi';
+import { useChainId, useSignMessage, useWalletClient } from 'wagmi';
 import {
   generateStealthMetaAddressFromSignature,
   generateStealthAddress
@@ -13,9 +13,12 @@ import type {
   HexString
 } from '@scopelift/stealth-address-sdk/dist/utils/crypto/types';
 import ConnectViaWalletConnect from '@/components/connect-via-walletconnect';
+import { useWalletConnect } from '@/contexts/walletconnect';
 
 export default function Home() {
   const chainId = useChainId();
+  const { setStealthAddress: setStealthAddressForWalletConnect } =
+    useWalletConnect();
   const { signMessageAsync } = useSignMessage();
   const MESSAGE_TO_SIGN = `Generate Stealth Meta-Address on ${chainId} chain`;
 
@@ -38,6 +41,7 @@ export default function Home() {
       stealthMetaAddressURI: stealthMetaAddress
     });
     setStealthAddress(stealthAddress);
+    setStealthAddressForWalletConnect(stealthAddress);
   };
 
   return (
@@ -74,7 +78,7 @@ export default function Home() {
 
           {stealthAddress && (
             <div className="mt-8">
-              <ConnectViaWalletConnect />
+              <ConnectViaWalletConnect stealthAddress={stealthAddress} />
             </div>
           )}
         </div>
