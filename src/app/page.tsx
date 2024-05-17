@@ -2,37 +2,21 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState } from 'react';
-import { useChainId, useSignMessage } from 'wagmi';
-import {
-  generateStealthMetaAddressFromSignature,
-  generateStealthAddress
-} from '@scopelift/stealth-address-sdk';
+import { generateStealthAddress } from '@scopelift/stealth-address-sdk';
 import { Button } from '@/components/ui';
-import type {
-  EthAddress,
-  HexString
-} from '@scopelift/stealth-address-sdk/dist/utils/crypto/types';
 import ConnectViaWalletConnect from '@/components/connect-via-walletconnect';
 import { useWalletConnect } from '@/contexts/walletconnect';
 import WalletConnectSessions from '@/components/walletconnect-sessions';
+import useAuth from '@/hooks/use-auth';
+import type { Address } from 'viem';
 
 export default function Home() {
-  const chainId = useChainId();
   const { sessions: walletconnectSessions } = useWalletConnect();
   const { setStealthAddress: setStealthAddressForWalletConnect } =
     useWalletConnect();
-  const { signMessageAsync } = useSignMessage();
-  const MESSAGE_TO_SIGN = `Generate Stealth Meta-Address on ${chainId} chain`;
+  const { handleSignMessage, stealthMetaAddress } = useAuth();
 
-  const [stealthMetaAddress, setStealthMetaAddress] = useState<HexString>();
-  const [stealthAddress, setStealthAddress] = useState<EthAddress>();
-
-  const handleSignMessage = async () => {
-    const signature = await signMessageAsync({ message: MESSAGE_TO_SIGN });
-    const newStealthMetaAddress =
-      generateStealthMetaAddressFromSignature(signature);
-    setStealthMetaAddress(newStealthMetaAddress);
-  };
+  const [stealthAddress, setStealthAddress] = useState<Address>();
 
   const handleGenerateStealthAddress = async () => {
     if (!stealthMetaAddress) {

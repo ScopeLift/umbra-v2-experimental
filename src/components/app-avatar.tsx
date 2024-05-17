@@ -13,7 +13,7 @@ const AppAvatar = ({ imageSrc }: AppAvatarProps) => {
         height={40}
         className="rounded-full border-[1px] border-gray-300 shadow-md p-1"
       />
-      <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+      <div className="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
     </div>
   );
 };
