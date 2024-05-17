@@ -2,7 +2,7 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState } from 'react';
-import { useChainId, useSignMessage, useWalletClient } from 'wagmi';
+import { useChainId, useSignMessage } from 'wagmi';
 import {
   generateStealthMetaAddressFromSignature,
   generateStealthAddress
@@ -14,9 +14,11 @@ import type {
 } from '@scopelift/stealth-address-sdk/dist/utils/crypto/types';
 import ConnectViaWalletConnect from '@/components/connect-via-walletconnect';
 import { useWalletConnect } from '@/contexts/walletconnect';
+import WalletConnectSessions from '@/components/walletconnect-sessions';
 
 export default function Home() {
   const chainId = useChainId();
+  const { sessions: walletconnectSessions } = useWalletConnect();
   const { setStealthAddress: setStealthAddressForWalletConnect } =
     useWalletConnect();
   const { signMessageAsync } = useSignMessage();
@@ -45,44 +47,45 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center p-24 gap-8">
       <nav className="mb-32 w-full">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <ConnectButton chainStatus="icon" />
-          <Button onClick={handleSignMessage}>Auth</Button>
+          {!stealthMetaAddress && (
+            <Button onClick={handleSignMessage}>Auth</Button>
+          )}
         </div>
-        <div>
+        <div className="mt-8">
           {stealthMetaAddress ? (
-            <>
-              <div className="mt-8">
+            <div className="flex flex-col gap-4">
+              <div>
                 <div className="text-lg font-bold">Stealth Meta-Address:</div>
                 <div className="text-sm">{stealthMetaAddress}</div>
               </div>
-              <div className="mt-8">
-                <Button onClick={handleGenerateStealthAddress}>
-                  Generate Stealth Address
-                </Button>
-              </div>
               {stealthAddress && (
-                <div className="mt-8">
+                <div className="mt-4">
                   <div className="text-lg font-bold">Stealth Address:</div>
                   <div className="text-sm">{stealthAddress}</div>
                 </div>
               )}
-            </>
+              <Button
+                className="mt-4 lg:max-w-80"
+                onClick={handleGenerateStealthAddress}
+              >
+                Generate Stealth Address
+              </Button>
+            </div>
           ) : (
-            <div className="mt-8">
-              Click Auth to generate Stealth Meta-Address
-            </div>
-          )}
-
-          {stealthAddress && (
-            <div className="mt-8">
-              <ConnectViaWalletConnect stealthAddress={stealthAddress} />
-            </div>
+            <div>Click Auth to generate Stealth Meta-Address</div>
           )}
         </div>
       </nav>
+      {stealthAddress && (
+        <ConnectViaWalletConnect stealthAddress={stealthAddress} />
+      )}
+      {walletconnectSessions.length ? (
+        <WalletConnectSessions sessions={walletconnectSessions} />
+      ) : null}
     </main>
   );
 }

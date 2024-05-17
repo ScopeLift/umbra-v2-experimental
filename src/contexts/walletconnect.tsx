@@ -167,12 +167,9 @@ export const WalletConnectProvider = ({
 
   // Handle clean up
   useEffect(() => {
-    if (!web3Wallet) {
-      console.log('No web3Wallet');
-      return;
+    if (web3Wallet) {
+      web3Wallet.on(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
     }
-
-    web3Wallet.on(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
 
     return () => {
       if (web3Wallet) {

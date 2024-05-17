@@ -10,7 +10,7 @@ interface ConnectViaWalletConnectProps {
 const ConnectViaWalletConnect = ({
   stealthAddress
 }: ConnectViaWalletConnectProps) => {
-  const { connect, sessions } = useWalletConnect();
+  const { connect } = useWalletConnect();
   const [walletConnectURI, setWalletConnectURI] = useState('');
   const [inputIsFocused, setInputIsFocused] = useState(false);
 
@@ -21,7 +21,6 @@ const ConnectViaWalletConnect = ({
 
   const handlePasteClick = async () => {
     try {
-      // Check if the navigator.clipboard API is available
       if (!navigator.clipboard) {
         console.error('Clipboard access is not available.');
         return;
@@ -42,11 +41,11 @@ const ConnectViaWalletConnect = ({
   const handleInputBlur = () => setInputIsFocused(false);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <div className="text-lg font-bold">
         Connect dApps to Your Stealth Address
       </div>
-      <p>
+      <p className="text-sm">
         Paste the pairing code below to connect to your Stealth Address via
         WalletConnect
       </p>
@@ -60,17 +59,6 @@ const ConnectViaWalletConnect = ({
         />
         <Button onClick={handlePasteClick}>Paste</Button>
       </div>
-      <div>Sessions</div>
-      <ul>
-        {sessions.map(session => (
-          <li key={session.topic}>
-            <div>Topic: {session.topic}</div>
-            <div>Name: {session.peer.metadata.name}</div>
-            <div>ChainId: {session.peer.metadata.url}</div>
-            <div>Account: {session.peer.publicKey}</div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };
