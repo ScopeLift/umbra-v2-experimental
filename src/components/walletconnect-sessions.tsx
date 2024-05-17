@@ -1,14 +1,7 @@
 import type { SessionTypes } from '@walletconnect/types';
 import { EIP155, stripEip155Prefix } from '@/contexts/walletconnect';
 import AppAvatar from './app-avatar';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter
-} from './ui/card';
+import { Card, CardTitle, CardDescription } from './ui/card';
 
 interface WalletConnectSessionsProps {
   sessions: SessionTypes.Struct[];
