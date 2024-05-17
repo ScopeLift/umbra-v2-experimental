@@ -9,6 +9,8 @@ import { useWalletConnect } from '@/contexts/walletconnect';
 import WalletConnectSessions from '@/components/walletconnect-sessions';
 import useAuth from '@/hooks/use-auth';
 import type { Address } from 'viem';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { BellIcon, TerminalIcon } from 'lucide-react';
 
 export default function Home() {
   const { sessions: walletconnectSessions } = useWalletConnect();
@@ -40,27 +42,29 @@ export default function Home() {
           )}
         </div>
         <div className="mt-8">
-          {stealthMetaAddress ? (
-            <div className="flex flex-col gap-4">
-              <div>
-                <div className="text-lg font-bold">Stealth Meta-Address:</div>
-                <div className="text-sm">{stealthMetaAddress}</div>
-              </div>
-              {stealthAddress && (
-                <div className="mt-4">
-                  <div className="text-lg font-bold">Stealth Address:</div>
-                  <div className="text-sm">{stealthAddress}</div>
-                </div>
-              )}
-              <Button
-                className="mt-4 lg:max-w-80"
-                onClick={handleGenerateStealthAddress}
-              >
-                Generate Stealth Address
-              </Button>
+          {!stealthMetaAddress && (
+            <Alert>
+              <BellIcon className="h-4 w-4" />
+              <AlertTitle>Authenticate</AlertTitle>
+              <AlertDescription>
+                Please authenticate to be able to generate a stealth address
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {stealthAddress && (
+            <div className="mt-4">
+              <div className="text-lg font-bold">Stealth Address:</div>
+              <div className="text-sm">{stealthAddress}</div>
             </div>
-          ) : (
-            <div>Click Auth to generate Stealth Meta-Address</div>
+          )}
+          {stealthMetaAddress && (
+            <Button
+              className="mt-4 lg:max-w-80"
+              onClick={handleGenerateStealthAddress}
+            >
+              Generate Stealth Address
+            </Button>
           )}
         </div>
       </nav>
