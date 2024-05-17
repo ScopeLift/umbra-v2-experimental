@@ -2,6 +2,8 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import { Button, Input } from '@/components/ui';
 import { useWalletConnect } from '@/contexts/walletconnect';
 import type { Address } from 'viem';
+import { useToast } from './ui/use-toast';
+import { Card } from './ui/card';
 
 interface ConnectViaWalletConnectProps {
   stealthAddress: Address;
@@ -10,6 +12,7 @@ interface ConnectViaWalletConnectProps {
 const ConnectViaWalletConnect = ({
   stealthAddress
 }: ConnectViaWalletConnectProps) => {
+  const { toast } = useToast();
   const { connect } = useWalletConnect();
   const [walletConnectURI, setWalletConnectURI] = useState('');
   const [inputIsFocused, setInputIsFocused] = useState(false);
@@ -34,14 +37,36 @@ const ConnectViaWalletConnect = ({
 
   useEffect(() => {
     if (!walletConnectURI) return;
-    connect({ uri: walletConnectURI, stealthAddress });
-  }, [connect, walletConnectURI, stealthAddress]);
+
+    const connectToAddressViaWalletConnect = async () => {
+      toast({
+        title: 'Connecting to Stealth Address Via WalletConnect...',
+        description: 'Please wait while the connection is established.'
+      });
+      try {
+        await connect({ uri: walletConnectURI, stealthAddress });
+        toast({
+          title: 'Connected to Stealth Address Via WalletConnect',
+          description: 'Please go to app to start using your Stealth Address.',
+          duration: 5000
+        });
+      } catch (error) {
+        toast({
+          title: 'Failed to connect',
+          description: `Error: ${error}`,
+          variant: 'destructive'
+        });
+      }
+    };
+
+    connectToAddressViaWalletConnect();
+  }, [connect, walletConnectURI, stealthAddress, toast]);
 
   const handleInputFocus = () => setInputIsFocused(true);
   const handleInputBlur = () => setInputIsFocused(false);
 
   return (
-    <div className="flex flex-col gap-4">
+    <Card className="flex flex-col gap-4 p-4">
       <div className="text-lg font-bold">
         Connect dApps to Your Stealth Address
       </div>
@@ -59,7 +84,7 @@ const ConnectViaWalletConnect = ({
         />
         <Button onClick={handlePasteClick}>Paste</Button>
       </div>
-    </div>
+    </Card>
   );
 };
 

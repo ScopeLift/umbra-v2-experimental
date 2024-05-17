@@ -9,7 +9,7 @@ interface WalletConnectSessionsProps {
 
 const WalletConnectSessions = ({ sessions }: WalletConnectSessionsProps) => {
   return (
-    <div className="w-full max-w-lg mx-auto">
+    <div className="flex flex-col w-full max-w-lg">
       <h2 className="text-2xl font-semibold mb-4 text-gray-600">
         WalletConnect Connections
       </h2>
