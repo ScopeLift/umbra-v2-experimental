@@ -13,7 +13,6 @@ import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { useChainId } from 'wagmi';
 import type { Address } from 'viem';
-import useStealthAddressWalletClient from '@/hooks/use-stealth-address-wallet-client';
 import {
   approveTransactionRequest,
   rejectTransactionRequest
