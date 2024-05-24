@@ -13,9 +13,15 @@ import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { useChainId } from 'wagmi';
 import type { Address } from 'viem';
+import useStealthAddressWalletClient from '@/hooks/use-stealth-address-wallet-client';
+import {
+  approveTransactionRequest,
+  rejectTransactionRequest
+} from './helpers/walletconnect-helpers';
 
 enum WC_SDK_EVENTS {
-  SESSION_PROPOSAL = 'session_proposal'
+  SESSION_PROPOSAL = 'session_proposal',
+  SESSION_REQUEST = 'session_request'
 }
 
 enum WC_SDK_ERRORS {
@@ -42,6 +48,14 @@ type WalletConnectContextType = {
   }) => Promise<void>;
   sessions: SessionTypes.Struct[];
   setStealthAddress: (stealthAddress: Address) => void;
+  stealthAddress: Address | undefined;
+  approveSessionRequest: (
+    response: Web3WalletTypes.SessionRequest
+  ) => Promise<void>;
+  rejectSessionRequest: (
+    request: Web3WalletTypes.SessionRequest
+  ) => Promise<void>;
+  sessionRequest: Web3WalletTypes.SessionRequest | undefined;
 };
 
 const WalletConnectContext = createContext<
@@ -59,8 +73,14 @@ export const WalletConnectProvider = ({
   children
 }: { children: ReactNode }) => {
   const chainId = useChainId();
+  const stealthAddressWalletClient = useStealthAddressWalletClient();
+
   const [web3Wallet, setWeb3Wallet] = useState<Client>();
   const [sessions, setSessions] = useState<SessionTypes.Struct[]>([]);
+  const [sessionRequest, setSessionRequest] =
+    useState<Web3WalletTypes.SessionRequest>();
+  const [sessionResponse, setSessionResponse] = useState<any>();
+
   const [stealthAddress, setStealthAddress] = useState<Address>();
 
   const getActiveSessions = useCallback((): SessionTypes.Struct[] => {
@@ -134,6 +154,13 @@ export const WalletConnectProvider = ({
     [web3Wallet, chainId, getActiveSessions, getNamespaces, stealthAddress]
   );
 
+  const handleSessionRequest = useCallback(
+    async (requestEvent: Web3WalletTypes.SessionRequest) => {
+      setSessionRequest(requestEvent);
+    },
+    []
+  );
+
   const initWalletConnect = useCallback(async () => {
     try {
       const core = new Core({
@@ -169,14 +196,16 @@ export const WalletConnectProvider = ({
   useEffect(() => {
     if (web3Wallet) {
       web3Wallet.on(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
+      web3Wallet.on(WC_SDK_EVENTS.SESSION_REQUEST, handleSessionRequest);
     }
 
     return () => {
       if (web3Wallet) {
         web3Wallet.off(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
+        web3Wallet.off(WC_SDK_EVENTS.SESSION_REQUEST, handleSessionRequest);
       }
     };
-  }, [web3Wallet, handleSessionProposal]);
+  }, [web3Wallet, handleSessionProposal, handleSessionRequest]);
 
   const connect = useCallback(
     async ({ uri }: { uri: string; stealthAddress: Address }) => {
@@ -192,9 +221,56 @@ export const WalletConnectProvider = ({
     [web3Wallet, getActiveSessions]
   );
 
+  const approveSessionRequest = useCallback(async () => {
+    if (!web3Wallet)
+      throw new Error('Web3Wallet not initialized in approveTransaction');
+
+    if (!stealthAddressWalletClient)
+      throw new Error(
+        'Stealth Address Wallet Client not initialized in approveTransaction'
+      );
+
+    if (!stealthAddressWalletClient.account)
+      throw new Error(
+        'Stealth Address Wallet Client account not initialized in approveTransaction'
+      );
+
+    if (!sessionRequest)
+      throw new Error('Session Request not initialized in approveTransaction');
+
+    const response = await approveTransactionRequest({
+      request: sessionRequest,
+      stealthAddress: stealthAddressWalletClient.account.address,
+      walletClient: stealthAddressWalletClient
+    });
+
+    setSessionResponse(response);
+    setSessionRequest(undefined);
+  }, [sessionRequest, web3Wallet, stealthAddressWalletClient]);
+
+  const rejectSessionRequest = useCallback(async () => {
+    if (!web3Wallet) throw new Error('Web3Wallet not initialized');
+    if (!sessionRequest) throw new Error('Session Request not initialized');
+
+    const errorResponse = rejectTransactionRequest(sessionRequest);
+    await web3Wallet.respondSessionRequest({
+      topic: sessionRequest.topic,
+      response: errorResponse
+    });
+    setSessionRequest(undefined);
+  }, [web3Wallet, sessionRequest]);
+
   return (
     <WalletConnectContext.Provider
-      value={{ connect, sessions, setStealthAddress }}
+      value={{
+        connect,
+        sessions,
+        setStealthAddress,
+        stealthAddress,
+        approveSessionRequest,
+        rejectSessionRequest,
+        sessionRequest
+      }}
     >
       {children}
     </WalletConnectContext.Provider>
