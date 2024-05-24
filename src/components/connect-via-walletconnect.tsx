@@ -45,16 +45,19 @@ const ConnectViaWalletConnect = ({
       });
       try {
         await connect({ uri: walletConnectURI, stealthAddress });
+        setWalletConnectURI('');
         toast({
           title: 'Connected to Stealth Address Via WalletConnect',
           description: 'Please go to app to start using your Stealth Address.',
           duration: 5000
         });
       } catch (error) {
+        setWalletConnectURI('');
         toast({
           title: 'Failed to connect',
           description: `Error: ${error}`,
-          variant: 'destructive'
+          variant: 'destructive',
+          duration: 5000
         });
       }
     };

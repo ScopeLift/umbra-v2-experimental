@@ -18,6 +18,7 @@ import {
   approveTransactionRequest,
   rejectTransactionRequest
 } from './helpers/walletconnect-helpers';
+import { useAuth } from './auth';
 
 enum WC_SDK_EVENTS {
   SESSION_PROPOSAL = 'session_proposal',
@@ -49,13 +50,14 @@ type WalletConnectContextType = {
   sessions: SessionTypes.Struct[];
   setStealthAddress: (stealthAddress: Address) => void;
   stealthAddress: Address | undefined;
-  approveSessionRequest: (
-    response: Web3WalletTypes.SessionRequest
-  ) => Promise<void>;
+  approveSessionRequest: () => Promise<void>;
   rejectSessionRequest: (
     request: Web3WalletTypes.SessionRequest
   ) => Promise<void>;
   sessionRequest: Web3WalletTypes.SessionRequest | undefined;
+
+  // biome-ignore lint/suspicious/noExplicitAny: TODO figure out better way
+  sessionResponse: any;
 };
 
 const WalletConnectContext = createContext<
@@ -73,13 +75,13 @@ export const WalletConnectProvider = ({
   children
 }: { children: ReactNode }) => {
   const chainId = useChainId();
-  const stealthAddressWalletClient = useStealthAddressWalletClient();
+  const { stealthAddressWalletClient } = useAuth();
 
   const [web3Wallet, setWeb3Wallet] = useState<Client>();
   const [sessions, setSessions] = useState<SessionTypes.Struct[]>([]);
   const [sessionRequest, setSessionRequest] =
     useState<Web3WalletTypes.SessionRequest>();
-  const [sessionResponse, setSessionResponse] = useState<any>();
+  const [sessionResponse, setSessionResponse] = useState();
 
   const [stealthAddress, setStealthAddress] = useState<Address>();
 
@@ -102,8 +104,8 @@ export const WalletConnectProvider = ({
       eip155ChainId => `${eip155ChainId}:${stealthAddress}`
     );
 
-    const methods = proposalParams.requiredNamespaces[EIP155]?.methods || [];
-    const events = proposalParams.requiredNamespaces[EIP155]?.events || [];
+    const methods = ['eth_sendTransaction', 'personal_sign'];
+    const events = ['accountsChanged', 'chainChanged'];
 
     return buildApprovedNamespaces({
       proposal: proposalParams,
@@ -192,13 +194,13 @@ export const WalletConnectProvider = ({
     initWalletConnect();
   }, [initWalletConnect]);
 
-  // Handle clean up
   useEffect(() => {
     if (web3Wallet) {
       web3Wallet.on(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
       web3Wallet.on(WC_SDK_EVENTS.SESSION_REQUEST, handleSessionRequest);
     }
 
+    // Handle clean up
     return () => {
       if (web3Wallet) {
         web3Wallet.off(WC_SDK_EVENTS.SESSION_PROPOSAL, handleSessionProposal);
@@ -269,7 +271,8 @@ export const WalletConnectProvider = ({
         stealthAddress,
         approveSessionRequest,
         rejectSessionRequest,
-        sessionRequest
+        sessionRequest,
+        sessionResponse
       }}
     >
       {children}
