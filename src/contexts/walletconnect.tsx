@@ -58,6 +58,11 @@ type WalletConnectContextType = {
 
   // biome-ignore lint/suspicious/noExplicitAny: TODO figure out better way
   sessionResponse: any;
+
+  isApproveSessionRequestPending: boolean;
+  approveSessionRequestError: string | undefined;
+  isApproveSessionRequestError: boolean;
+  isApproveSessionRequestSuccess: boolean;
 };
 
 const WalletConnectContext = createContext<
@@ -78,8 +83,18 @@ export const WalletConnectProvider = ({
 
   const [web3Wallet, setWeb3Wallet] = useState<Client>();
   const [sessions, setSessions] = useState<SessionTypes.Struct[]>([]);
+
   const [sessionRequest, setSessionRequest] =
     useState<Web3WalletTypes.SessionRequest>();
+  const [isApproveSessionRequestPending, setIsApproveSessionRequestPending] =
+    useState(false);
+  const [approveSessionRequestError, setApproveSessionRequestError] =
+    useState<string>();
+  const [isApproveSessionRequestError, setIsApproveSessionRequestError] =
+    useState(false);
+  const [isApproveSessionRequestSuccess, setIsApproveSessionRequestSuccess] =
+    useState(false);
+
   const [sessionResponse, setSessionResponse] = useState();
 
   const [stealthAddress, setStealthAddress] = useState<Address>();
@@ -224,6 +239,7 @@ export const WalletConnectProvider = ({
 
   const approveSessionRequest = useCallback(
     async (stealthAddressWalletClient: WalletClient) => {
+      setIsApproveSessionRequestPending(true);
       if (!web3Wallet)
         throw new Error('Web3Wallet not initialized in approveTransaction');
 
@@ -252,11 +268,14 @@ export const WalletConnectProvider = ({
           walletClient: stealthAddressWalletClient
         });
       } catch (error) {
+        setApproveSessionRequestError((error as Error).message);
         console.log('error', error);
       }
 
       setSessionResponse(response);
       setSessionRequest(undefined);
+      setIsApproveSessionRequestPending(false);
+      setIsApproveSessionRequestSuccess(true);
     },
     [sessionRequest, web3Wallet]
   );
@@ -283,7 +302,11 @@ export const WalletConnectProvider = ({
         approveSessionRequest,
         rejectSessionRequest,
         sessionRequest,
-        sessionResponse
+        sessionResponse,
+        isApproveSessionRequestPending,
+        approveSessionRequestError,
+        isApproveSessionRequestError,
+        isApproveSessionRequestSuccess
       }}
     >
       {children}

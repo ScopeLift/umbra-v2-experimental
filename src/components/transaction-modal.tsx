@@ -9,18 +9,24 @@ import {
 import { Button } from '@/components/ui/button';
 import { useWalletConnect } from '@/contexts/walletconnect';
 import { useAuth } from '@/contexts/auth';
+import { useToast } from '@/components/ui/use-toast';
 
 const TransactionModal = () => {
   const {
     approveSessionRequest,
     rejectSessionRequest,
     sessionRequest,
-    stealthAddress
+    stealthAddress,
+    isApproveSessionRequestPending,
+    approveSessionRequestError,
+    isApproveSessionRequestError,
+    isApproveSessionRequestSuccess
   } = useWalletConnect();
 
   const { getStealthAddressWalletClient } = useAuth();
+  const { toast } = useToast();
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!stealthAddress) {
       console.error('Stealth address not found during handle approve');
       return;
@@ -32,7 +38,36 @@ const TransactionModal = () => {
       return;
     }
 
-    approveSessionRequest(walletClient);
+    try {
+      await approveSessionRequest(walletClient);
+      toast({
+        title: 'Transaction Success',
+        description: 'Your transaction is successfull.',
+        duration: 5000,
+        variant: 'default'
+      });
+    } catch (error) {
+      toast({
+        title: 'Transaction Error',
+        description: (error as Error).message,
+        duration: 5000,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleReject = async () => {
+    if (!sessionRequest) {
+      console.error('Session request not found during handle reject');
+      return;
+    }
+    await rejectSessionRequest(sessionRequest);
+    toast({
+      title: 'Approval Rejected',
+      description: 'The transaction has been rejected.',
+      duration: 5000,
+      variant: 'destructive'
+    });
   };
 
   if (!sessionRequest) return null;
@@ -56,12 +91,18 @@ const TransactionModal = () => {
         </div>
         <DialogFooter className="flex justify-end space-x-2">
           <Button
-            onClick={() => rejectSessionRequest(sessionRequest)}
+            onClick={handleReject}
             variant="destructive"
+            disabled={isApproveSessionRequestPending}
           >
             Reject
           </Button>
-          <Button onClick={handleApprove}>Approve</Button>
+          <Button
+            onClick={handleApprove}
+            disabled={isApproveSessionRequestPending}
+          >
+            Approve
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
