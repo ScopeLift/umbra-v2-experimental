@@ -16,7 +16,7 @@ import type {
   GenerateStealthAddressReturnType,
   HexString
 } from '@scopelift/stealth-address-sdk/dist/utils/crypto/types';
-import { type WalletClient, createWalletClient, custom } from 'viem';
+import { type WalletClient, createWalletClient, custom, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 import { useAccount, useChainId, useSignMessage } from 'wagmi';
@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return createWalletClient({
         account: privateKeyToAccount(stealthAddressPrivateKey),
         chain: sepolia,
-        transport: custom(window.ethereum)
+        transport: http()
       });
     },
     [stealthAddressDetails]

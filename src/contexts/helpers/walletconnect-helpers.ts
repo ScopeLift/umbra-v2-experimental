@@ -4,7 +4,14 @@ import {
 } from '@walletconnect/jsonrpc-utils';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-import { type Account, hexToString, isAddress, type WalletClient } from 'viem';
+import {
+  type Account,
+  hexToString,
+  isAddress,
+  type WalletClient,
+  getAddress
+} from 'viem';
+import { sepolia } from 'viem/chains';
 
 export const approveTransactionRequest = async ({
   request,
@@ -19,12 +26,8 @@ export const approveTransactionRequest = async ({
     throw new Error('No account in approveTransactionRequest');
   }
 
-  console.log('🦄 ~ walletClient:', walletClient);
   const { id, params } = request;
-  console.log('🦄 ~ id:', id);
-  console.log('🦄 ~ params:', params);
   const { request: rpcRequest } = params;
-  console.log('🦄 ~ rpcRequest:', rpcRequest);
 
   try {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -63,8 +66,18 @@ export const approveTransactionRequest = async ({
 
       case 'eth_sendTransaction': {
         const sendTransaction = rpcRequest.params[0];
-        const hash = await walletClient.sendTransaction(sendTransaction);
-        response = formatJsonRpcResult(id, hash);
+        const formattedTransaction = formatTransactionForViem(sendTransaction);
+
+        try {
+          const hash = await walletClient.sendTransaction({
+            ...formattedTransaction,
+            account: walletClient.account,
+            chain: sepolia
+          });
+          response = formatJsonRpcResult(id, hash);
+        } catch (error) {
+          console.log('eth_sendTransaction', error);
+        }
         break;
       }
 
@@ -113,4 +126,27 @@ export function getSignTypedDataParamsData(params: string[]) {
     return JSON.parse(data);
   }
   return data;
+}
+
+/**
+ * Formats the transaction request caught by walletconnect to be sent by viem
+ */
+function formatTransactionForViem(transaction: {
+  to: string;
+  from: string;
+  data: string;
+  value: string;
+}): {
+  to: `0x${string}`;
+  account: `0x${string}`;
+  data: `0x${string}`;
+  value: bigint;
+} {
+  const formattedTransaction = {
+    to: getAddress(transaction.to),
+    account: getAddress(transaction.from),
+    data: transaction.data as `0x${string}`,
+    value: BigInt(transaction.value)
+  };
+  return formattedTransaction;
 }

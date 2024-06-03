@@ -245,21 +245,12 @@ export const WalletConnectProvider = ({
       // biome-ignore lint/suspicious/noExplicitAny: TODO figure out a better way
       let response: any;
 
-      console.log(
-        '🦄 ~ approveSessionRequest ~ stealthAddressWalletClient:',
-        stealthAddressWalletClient
-      );
-      console.log(
-        '🦄 ~ approveSessionRequest ~ stealthAddressWalletClient.account:',
-        stealthAddressWalletClient.account
-      );
       try {
         response = await approveTransactionRequest({
           request: sessionRequest,
           stealthAddressAccount: stealthAddressWalletClient.account,
           walletClient: stealthAddressWalletClient
         });
-        console.log('🦄 ~ approveSessionRequest ~ response:', response);
       } catch (error) {
         console.log('error', error);
       }
