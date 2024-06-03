@@ -1,43 +1,25 @@
 'use client';
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useContext, useEffect, useState } from 'react';
-import { generateStealthAddress } from '@scopelift/stealth-address-sdk';
 import { Button } from '@/components/ui';
 import ConnectViaWalletConnect from '@/components/connect-via-walletconnect';
 import { useWalletConnect } from '@/contexts/walletconnect';
 import WalletConnectSessions from '@/components/walletconnect-sessions';
-import type { Address } from 'viem';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BellIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import TransactionModal from '@/components/transaction-modal';
-import { useAccount } from 'wagmi';
 import { useAuth } from '@/contexts/auth';
 
 export default function Home() {
-  const { isConnected } = useAccount();
-  const { handleSignMessage, stealthMetaAddress } = useAuth();
-  const { sessions: walletconnectSessions, sessionRequest } =
+  const {
+    handleSignMessage,
+    handleGenerateStealthAddress,
+    stealthMetaAddress,
+    needsAuth
+  } = useAuth();
+  const { sessions: walletconnectSessions, stealthAddress } =
     useWalletConnect();
-  const { setStealthAddress: setStealthAddressForWalletConnect } =
-    useWalletConnect();
-
-  const [stealthAddress, setStealthAddress] = useState<Address>();
-
-  const handleGenerateStealthAddress = async () => {
-    if (!stealthMetaAddress) {
-      console.error('Stealth Meta-Address is not set');
-      return;
-    }
-    const { stealthAddress } = generateStealthAddress({
-      stealthMetaAddressURI: stealthMetaAddress
-    });
-    setStealthAddress(stealthAddress);
-    setStealthAddressForWalletConnect(stealthAddress);
-  };
-
-  const needsAuth = !stealthMetaAddress && isConnected;
 
   return (
     <main className="flex min-h-screen flex-col items-center p-20 gap-8">

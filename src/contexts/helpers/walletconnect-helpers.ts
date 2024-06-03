@@ -4,23 +4,27 @@ import {
 } from '@walletconnect/jsonrpc-utils';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-import { hexToString, isAddress, type Address, type WalletClient } from 'viem';
+import { type Account, hexToString, isAddress, type WalletClient } from 'viem';
 
 export const approveTransactionRequest = async ({
   request,
-  stealthAddress,
+  stealthAddressAccount,
   walletClient
 }: {
   request: Web3WalletTypes.SessionRequest;
-  stealthAddress: Address;
+  stealthAddressAccount: Account;
   walletClient: WalletClient;
 }) => {
   if (!walletClient.account) {
     throw new Error('No account in approveTransactionRequest');
   }
 
+  console.log('🦄 ~ walletClient:', walletClient);
   const { id, params } = request;
+  console.log('🦄 ~ id:', id);
+  console.log('🦄 ~ params:', params);
   const { request: rpcRequest } = params;
+  console.log('🦄 ~ rpcRequest:', rpcRequest);
 
   try {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -32,7 +36,7 @@ export const approveTransactionRequest = async ({
         const message = getSignParamsMessage(rpcRequest.params);
         const signedMessage = await walletClient.signMessage({
           message,
-          account: stealthAddress
+          account: stealthAddressAccount
         });
         response = formatJsonRpcResult(id, signedMessage);
         break;

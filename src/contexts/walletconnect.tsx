@@ -12,12 +12,11 @@ import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { useChainId } from 'wagmi';
-import type { Address } from 'viem';
+import type { Address, WalletClient } from 'viem';
 import {
   approveTransactionRequest,
   rejectTransactionRequest
 } from './helpers/walletconnect-helpers';
-import { useAuth } from './auth';
 
 enum WC_SDK_EVENTS {
   SESSION_PROPOSAL = 'session_proposal',
@@ -49,7 +48,9 @@ type WalletConnectContextType = {
   sessions: SessionTypes.Struct[];
   setStealthAddress: (stealthAddress: Address) => void;
   stealthAddress: Address | undefined;
-  approveSessionRequest: () => Promise<void>;
+  approveSessionRequest: (
+    stealthAddressWalletClient: WalletClient
+  ) => Promise<void>;
   rejectSessionRequest: (
     request: Web3WalletTypes.SessionRequest
   ) => Promise<void>;
@@ -74,7 +75,6 @@ export const WalletConnectProvider = ({
   children
 }: { children: ReactNode }) => {
   const chainId = useChainId();
-  const { stealthAddressWalletClient } = useAuth();
 
   const [web3Wallet, setWeb3Wallet] = useState<Client>();
   const [sessions, setSessions] = useState<SessionTypes.Struct[]>([]);
@@ -222,32 +222,53 @@ export const WalletConnectProvider = ({
     [web3Wallet, getActiveSessions]
   );
 
-  const approveSessionRequest = useCallback(async () => {
-    if (!web3Wallet)
-      throw new Error('Web3Wallet not initialized in approveTransaction');
+  const approveSessionRequest = useCallback(
+    async (stealthAddressWalletClient: WalletClient) => {
+      if (!web3Wallet)
+        throw new Error('Web3Wallet not initialized in approveTransaction');
 
-    if (!stealthAddressWalletClient)
-      throw new Error(
-        'Stealth Address Wallet Client not initialized in approveTransaction'
+      if (!stealthAddressWalletClient)
+        throw new Error(
+          'Stealth Address Wallet Client not initialized in approveTransaction'
+        );
+
+      if (!stealthAddressWalletClient.account)
+        throw new Error(
+          'Stealth Address Wallet Client account not initialized in approveTransaction'
+        );
+
+      if (!sessionRequest)
+        throw new Error(
+          'Session Request not initialized in approveTransaction'
+        );
+
+      // biome-ignore lint/suspicious/noExplicitAny: TODO figure out a better way
+      let response: any;
+
+      console.log(
+        '🦄 ~ approveSessionRequest ~ stealthAddressWalletClient:',
+        stealthAddressWalletClient
       );
-
-    if (!stealthAddressWalletClient.account)
-      throw new Error(
-        'Stealth Address Wallet Client account not initialized in approveTransaction'
+      console.log(
+        '🦄 ~ approveSessionRequest ~ stealthAddressWalletClient.account:',
+        stealthAddressWalletClient.account
       );
+      try {
+        response = await approveTransactionRequest({
+          request: sessionRequest,
+          stealthAddressAccount: stealthAddressWalletClient.account,
+          walletClient: stealthAddressWalletClient
+        });
+        console.log('🦄 ~ approveSessionRequest ~ response:', response);
+      } catch (error) {
+        console.log('error', error);
+      }
 
-    if (!sessionRequest)
-      throw new Error('Session Request not initialized in approveTransaction');
-
-    const response = await approveTransactionRequest({
-      request: sessionRequest,
-      stealthAddress: stealthAddressWalletClient.account.address,
-      walletClient: stealthAddressWalletClient
-    });
-
-    setSessionResponse(response);
-    setSessionRequest(undefined);
-  }, [sessionRequest, web3Wallet, stealthAddressWalletClient]);
+      setSessionResponse(response);
+      setSessionRequest(undefined);
+    },
+    [sessionRequest, web3Wallet]
+  );
 
   const rejectSessionRequest = useCallback(async () => {
     if (!web3Wallet) throw new Error('Web3Wallet not initialized');

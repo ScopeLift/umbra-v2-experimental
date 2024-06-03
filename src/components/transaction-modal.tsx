@@ -8,10 +8,32 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useWalletConnect } from '@/contexts/walletconnect';
+import { useAuth } from '@/contexts/auth';
 
 const TransactionModal = () => {
-  const { approveSessionRequest, rejectSessionRequest, sessionRequest } =
-    useWalletConnect();
+  const {
+    approveSessionRequest,
+    rejectSessionRequest,
+    sessionRequest,
+    stealthAddress
+  } = useWalletConnect();
+
+  const { getStealthAddressWalletClient } = useAuth();
+
+  const handleApprove = () => {
+    if (!stealthAddress) {
+      console.error('Stealth address not found during handle approve');
+      return;
+    }
+
+    const walletClient = getStealthAddressWalletClient(stealthAddress);
+    if (!walletClient) {
+      console.error('Wallet client not found during handle approve');
+      return;
+    }
+
+    approveSessionRequest(walletClient);
+  };
 
   if (!sessionRequest) return null;
 
@@ -39,7 +61,7 @@ const TransactionModal = () => {
           >
             Reject
           </Button>
-          <Button onClick={() => approveSessionRequest()}>Approve</Button>
+          <Button onClick={handleApprove}>Approve</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

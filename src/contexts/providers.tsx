@@ -30,9 +30,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-          <AuthProvider>
-            <WalletConnectProvider>{children}</WalletConnectProvider>
-          </AuthProvider>
+          <WalletConnectProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </WalletConnectProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
