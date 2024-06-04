@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -10,18 +11,19 @@ import { Button } from '@/components/ui/button';
 import { useWalletConnect } from '@/contexts/walletconnect';
 import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/components/ui/use-toast';
+import { ToastAction } from '@/components/ui/toast';
+import useEtherscanTxUrl from '@/hooks/use-etherscan-tx-url';
 
 const TransactionModal = () => {
   const {
     approveSessionRequest,
     rejectSessionRequest,
     sessionRequest,
+    sessionResponse,
     stealthAddress,
-    isApproveSessionRequestPending,
-    approveSessionRequestError,
-    isApproveSessionRequestError,
-    isApproveSessionRequestSuccess
+    isApproveSessionRequestPending
   } = useWalletConnect();
+  const etherscanTxLink = useEtherscanTxUrl(sessionResponse?.result);
 
   const { getStealthAddressWalletClient } = useAuth();
   const { toast } = useToast();
@@ -42,9 +44,19 @@ const TransactionModal = () => {
       await approveSessionRequest(walletClient);
       toast({
         title: 'Transaction Success',
-        description: 'Your transaction is successfull.',
-        duration: 5000,
-        variant: 'default'
+        description: 'Your transaction was successfull.',
+        duration: 10000,
+        variant: 'default',
+        action: (
+          <ToastAction
+            altText="View on Explorer"
+            onClick={() => {
+              window.open(etherscanTxLink, '_blank');
+            }}
+          >
+            View on Explorer
+          </ToastAction>
+        )
       });
     } catch (error) {
       toast({
@@ -71,7 +83,6 @@ const TransactionModal = () => {
   };
 
   if (!sessionRequest) return null;
-
   return (
     <Dialog open={!!sessionRequest}>
       <DialogContent className="max-w-lg mx-auto p-6">
@@ -101,6 +112,9 @@ const TransactionModal = () => {
             onClick={handleApprove}
             disabled={isApproveSessionRequestPending}
           >
+            {isApproveSessionRequestPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Approve
           </Button>
         </DialogFooter>
