@@ -28,8 +28,8 @@ export default function Home() {
           <ConnectButton chainStatus="icon" />
         </div>
       </nav>
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:gap-28 w-full">
-        <div className="lg:w-1/3 flex flex-col gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
+        <div className="lg:col-span-1 flex flex-col gap-8">
           <Card className="p-6">
             {needsAuth && (
               <Alert className="mb-4">
@@ -74,7 +74,7 @@ export default function Home() {
           )}
         </div>
         {walletconnectSessions.length > 0 && (
-          <div className="lg:w-2/3 mt-8 lg:mt-0 flex-grow">
+          <div className="lg:col-span-2 flex-grow">
             <WalletConnectSessions sessions={walletconnectSessions} />
           </div>
         )}

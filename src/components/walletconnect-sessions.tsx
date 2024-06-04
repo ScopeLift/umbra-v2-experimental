@@ -9,7 +9,7 @@ interface WalletConnectSessionsProps {
 
 const WalletConnectSessions = ({ sessions }: WalletConnectSessionsProps) => {
   return (
-    <div className="flex flex-col w-full max-w-lg">
+    <div className="flex flex-col w-full">
       <h2 className="text-2xl font-semibold mb-4 text-gray-600">
         WalletConnect Connections
       </h2>
@@ -22,9 +22,9 @@ const WalletConnectSessions = ({ sessions }: WalletConnectSessionsProps) => {
                 <div className="flex flex-col gap-2">
                   <CardTitle>{session.peer.metadata.name}</CardTitle>
                   <CardDescription>{session.peer.metadata.url}</CardDescription>
-                  <div className="">
+                  <div>
                     <div className="text-sm text-gray-500">Account</div>
-                    <code>
+                    <code className="break-all text-xs">
                       {stripEip155Prefix(
                         session.namespaces[EIP155].accounts[0]
                       )}
