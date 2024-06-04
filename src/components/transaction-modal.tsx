@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -43,7 +44,7 @@ const TransactionModal = () => {
       await approveSessionRequest(walletClient);
       toast({
         title: 'Transaction Success',
-        description: 'Your transaction is successfull.',
+        description: 'Your transaction was successfull.',
         duration: 10000,
         variant: 'default',
         action: (
@@ -111,6 +112,9 @@ const TransactionModal = () => {
             onClick={handleApprove}
             disabled={isApproveSessionRequestPending}
           >
+            {isApproveSessionRequestPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Approve
           </Button>
         </DialogFooter>
