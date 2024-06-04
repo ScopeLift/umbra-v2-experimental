@@ -22,14 +22,14 @@ export default function Home() {
     useWalletConnect();
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-20 gap-8">
-      <nav className="mb-16 w-full">
+    <main className="flex min-h-screen flex-col items-center p-4 lg:p-20 gap-8">
+      <nav className="mb-8 lg:mb-16 w-full">
         <div className="flex justify-between items-center">
           <ConnectButton chainStatus="icon" />
           {needsAuth && <Button onClick={handleSignMessage}>Auth</Button>}
         </div>
-        <div className="mt-4 flex justify-center">
-          {needsAuth && (
+        {needsAuth && (
+          <div className="mt-4 flex justify-center">
             <Alert className="max-w-md flex items-start space-x-4 p-4">
               <BellIcon className="h-6 w-6 text-yellow-500" />
               <div>
@@ -41,8 +41,8 @@ export default function Home() {
                 </AlertDescription>
               </div>
             </Alert>
-          )}
-        </div>
+          </div>
+        )}
       </nav>
       <div className="flex flex-col lg:flex-row lg:justify-between lg:gap-28 w-full">
         {stealthMetaAddress && (
