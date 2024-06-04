@@ -22,59 +22,59 @@ export default function Home() {
     useWalletConnect();
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-20 gap-8">
-      <nav className="mb-16 w-full">
+    <main className="flex min-h-screen flex-col items-center p-4 lg:p-20 gap-8">
+      <nav className="mb-8 lg:mb-16 w-full">
         <div className="flex justify-between items-center">
           <ConnectButton chainStatus="icon" />
-          {needsAuth && <Button onClick={handleSignMessage}>Auth</Button>}
-        </div>
-        <div className="mt-4 flex justify-center">
-          {needsAuth && (
-            <Alert className="max-w-md flex items-start space-x-4 p-4">
-              <BellIcon className="h-6 w-6 text-yellow-500" />
-              <div>
-                <AlertTitle className="text-lg font-bold">
-                  Authenticate
-                </AlertTitle>
-                <AlertDescription>
-                  Please authenticate to be able to generate a stealth address.
-                </AlertDescription>
-              </div>
-            </Alert>
-          )}
         </div>
       </nav>
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:gap-28 w-full">
-        {stealthMetaAddress && (
-          <div className="lg:w-1/3 flex flex-col gap-8">
-            <Card className="p-6">
-              <div className="text-lg font-bold mb-2">Stealth Address</div>
-              {stealthAddress ? (
-                <>
-                  <div className="text-sm break-all mb-4">{stealthAddress}</div>
-                  <Button
-                    onClick={handleGenerateStealthAddress}
-                    className="w-full"
-                  >
-                    Generate New Stealth Address
-                  </Button>
-                </>
-              ) : (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
+        <div className="lg:col-span-1 flex flex-col gap-8">
+          <Card className="p-6">
+            {needsAuth && (
+              <Alert className="mb-4">
+                <BellIcon className="h-6 w-6 text-yellow-500" />
+                <div>
+                  <AlertTitle className="text-lg font-bold">
+                    Authenticate
+                  </AlertTitle>
+                  <AlertDescription>
+                    Please authenticate to be able to generate a stealth
+                    address.
+                  </AlertDescription>
+                </div>
+                <Button onClick={handleSignMessage} className="w-full mt-4">
+                  Auth
+                </Button>
+              </Alert>
+            )}
+            <div className="text-lg font-bold mb-2">Stealth Address</div>
+            {stealthAddress ? (
+              <>
+                <div className="text-sm break-all mb-4">{stealthAddress}</div>
                 <Button
                   onClick={handleGenerateStealthAddress}
                   className="w-full"
                 >
-                  Generate Stealth Address
+                  Generate New Stealth Address
                 </Button>
-              )}
-            </Card>
-            {stealthAddress && (
-              <ConnectViaWalletConnect stealthAddress={stealthAddress} />
+              </>
+            ) : (
+              <Button
+                onClick={handleGenerateStealthAddress}
+                className="w-full"
+                disabled={!stealthMetaAddress}
+              >
+                Generate Stealth Address
+              </Button>
             )}
-          </div>
-        )}
+          </Card>
+          {stealthAddress && (
+            <ConnectViaWalletConnect stealthAddress={stealthAddress} />
+          )}
+        </div>
         {walletconnectSessions.length > 0 && (
-          <div className="lg:w-2/3 mt-8 lg:mt-0 flex-grow">
+          <div className="lg:col-span-2 flex-grow">
             <WalletConnectSessions sessions={walletconnectSessions} />
           </div>
         )}
