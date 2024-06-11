@@ -39,15 +39,13 @@ export const stripEip155Prefix = (eip155Address: string): string => {
 
 type WalletConnectContextType = {
   connect: ({
-    uri,
-    stealthAddress
+    uri
   }: {
     uri: string;
-    stealthAddress: Address;
   }) => Promise<void>;
   sessions: SessionTypes.Struct[];
-  setStealthAddress: (stealthAddress: Address) => void;
-  stealthAddress: Address | undefined;
+  setStealthAddresses: (addresses: Address[]) => void;
+  stealthAddresses: Address[] | undefined;
   approveSessionRequest: (
     stealthAddressWalletClient: WalletClient
   ) => Promise<void>;
@@ -97,7 +95,7 @@ export const WalletConnectProvider = ({
 
   const [sessionResponse, setSessionResponse] = useState();
 
-  const [stealthAddress, setStealthAddress] = useState<Address>();
+  const [stealthAddresses, setStealthAddresses] = useState<Address[]>();
 
   const getActiveSessions = useCallback((): SessionTypes.Struct[] => {
     const sessionsMap = web3Wallet?.getActiveSessions() || {};
@@ -107,16 +105,17 @@ export const WalletConnectProvider = ({
   const getNamespaces = ({
     proposalParams,
     chainId,
-    stealthAddress
+    stealthAddresses
   }: {
     proposalParams: Web3WalletTypes.SessionProposal['params'];
     chainId: number;
-    stealthAddress: Address;
+    stealthAddresses: Address[];
   }) => {
     const eip155ChainIds = [chainId].map(getEip155ChainId);
-    const eip155Accounts = eip155ChainIds.map(
-      eip155ChainId => `${eip155ChainId}:${stealthAddress}`
-    );
+    const eip155Accounts =
+      stealthAddresses.map(
+        stealthAddress => `${EIP155}:${chainId}:${stealthAddress}`
+      ) || [];
 
     const methods = ['eth_sendTransaction', 'personal_sign'];
     const events = ['accountsChanged', 'chainChanged'];
@@ -144,13 +143,14 @@ export const WalletConnectProvider = ({
     }) => {
       if (!web3Wallet) throw new Error('Web3Wallet not initialized');
       if (!chainId) throw new Error('ChainId not initialized');
-      if (!stealthAddress) throw new Error('StealthAddress not initialized');
+      if (!stealthAddresses)
+        throw new Error('StealthAddresses not initialized');
 
       try {
         const namespaces = getNamespaces({
           proposalParams: params,
           chainId,
-          stealthAddress
+          stealthAddresses
         });
 
         await web3Wallet.approveSession({
@@ -167,7 +167,7 @@ export const WalletConnectProvider = ({
         setSessions(getActiveSessions());
       }
     },
-    [web3Wallet, chainId, getActiveSessions, getNamespaces, stealthAddress]
+    [web3Wallet, chainId, getActiveSessions, getNamespaces, stealthAddresses]
   );
 
   const handleSessionRequest = useCallback(
@@ -224,7 +224,7 @@ export const WalletConnectProvider = ({
   }, [web3Wallet, handleSessionProposal, handleSessionRequest]);
 
   const connect = useCallback(
-    async ({ uri }: { uri: string; stealthAddress: Address }) => {
+    async ({ uri }: { uri: string }) => {
       if (!web3Wallet) throw new Error('Web3Wallet not initialized in connect');
 
       try {
@@ -297,8 +297,8 @@ export const WalletConnectProvider = ({
       value={{
         connect,
         sessions,
-        setStealthAddress,
-        stealthAddress,
+        setStealthAddresses,
+        stealthAddresses,
         approveSessionRequest,
         rejectSessionRequest,
         sessionRequest,

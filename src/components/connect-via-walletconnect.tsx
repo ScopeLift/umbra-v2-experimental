@@ -1,17 +1,10 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { Button, Input } from '@/components/ui';
 import { useWalletConnect } from '@/contexts/walletconnect';
-import type { Address } from 'viem';
 import { useToast } from './ui/use-toast';
 import { Card } from './ui/card';
 
-interface ConnectViaWalletConnectProps {
-  stealthAddress: Address;
-}
-
-const ConnectViaWalletConnect = ({
-  stealthAddress
-}: ConnectViaWalletConnectProps) => {
+const ConnectViaWalletConnect = () => {
   const { toast } = useToast();
   const { connect } = useWalletConnect();
   const [walletConnectURI, setWalletConnectURI] = useState('');
@@ -40,15 +33,16 @@ const ConnectViaWalletConnect = ({
 
     const connectToAddressViaWalletConnect = async () => {
       toast({
-        title: 'Connecting to Stealth Address Via WalletConnect...',
+        title: 'Connecting to Stealth Addresses Via WalletConnect...',
         description: 'Please wait while the connection is established.'
       });
       try {
-        await connect({ uri: walletConnectURI, stealthAddress });
+        await connect({ uri: walletConnectURI });
         setWalletConnectURI('');
         toast({
-          title: 'Connected to Stealth Address Via WalletConnect',
-          description: 'Please go to app to start using your Stealth Address.',
+          title: 'Connected to Stealth Addresses Via WalletConnect',
+          description:
+            'Please go to app to start using your Stealth Addresses.',
           duration: 5000
         });
       } catch (error) {
@@ -63,7 +57,7 @@ const ConnectViaWalletConnect = ({
     };
 
     connectToAddressViaWalletConnect();
-  }, [connect, walletConnectURI, stealthAddress, toast]);
+  }, [connect, walletConnectURI, toast]);
 
   const handleInputFocus = () => setInputIsFocused(true);
   const handleInputBlur = () => setInputIsFocused(false);

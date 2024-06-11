@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import useEtherscanTxUrl from '@/hooks/use-etherscan-tx-url';
+import { getStealthAddressFromSessionRequest } from '@/contexts/helpers/walletconnect-helpers';
 
 const TransactionModal = () => {
   const {
@@ -20,7 +21,6 @@ const TransactionModal = () => {
     rejectSessionRequest,
     sessionRequest,
     sessionResponse,
-    stealthAddress,
     isApproveSessionRequestPending
   } = useWalletConnect();
   const etherscanTxLink = useEtherscanTxUrl(sessionResponse?.result);
@@ -28,13 +28,9 @@ const TransactionModal = () => {
   const { getStealthAddressWalletClient } = useAuth();
   const { toast } = useToast();
 
-  const handleApprove = async () => {
-    if (!stealthAddress) {
-      console.error('Stealth address not found during handle approve');
-      return;
-    }
-
+  const handleApprove = async (stealthAddress: `0x${string}`) => {
     const walletClient = getStealthAddressWalletClient(stealthAddress);
+
     if (!walletClient) {
       console.error('Wallet client not found during handle approve');
       return;
@@ -83,6 +79,9 @@ const TransactionModal = () => {
   };
 
   if (!sessionRequest) return null;
+
+  const stealthAddress = getStealthAddressFromSessionRequest(sessionRequest);
+
   return (
     <Dialog open={!!sessionRequest}>
       <DialogContent className="max-w-lg mx-auto p-6">
@@ -109,7 +108,7 @@ const TransactionModal = () => {
             Reject
           </Button>
           <Button
-            onClick={handleApprove}
+            onClick={() => handleApprove(stealthAddress)}
             disabled={isApproveSessionRequestPending}
           >
             {isApproveSessionRequestPending && (
