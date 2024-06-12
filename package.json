@@ -28,8 +28,8 @@
     "react-dom": "^18",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "viem": "^2.13.3",
-    "wagmi": "^2.9.8"
+    "viem": "^2.13.8",
+    "wagmi": "^2.10.2"
   },
   "devDependencies": {
     "@biomejs/biome": "1.7.3",

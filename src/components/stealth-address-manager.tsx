@@ -13,6 +13,7 @@ import {
 import type { Address } from 'viem';
 import WalletConnectSessions from './walletconnect-sessions';
 import { useWalletConnect } from '@/contexts/walletconnect';
+import EthBalance from './eth-balance';
 
 const StealthAddressManager = () => {
   const { setSelectedStealthAddress: setSelectedStealthAddressForWC } =
@@ -65,9 +66,12 @@ const StealthAddressManager = () => {
             <AccordionTrigger className="hover:no-underline p-8">
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-col gap-2 text-left">
-                  <div className="font-bold">Stealth Address {index + 1}</div>
+                  <div className="flex gap-2 items-center">
+                    <div className="font-bold">Stealth Address {index + 1}</div>
+                    <EthBalance address={detail.stealthAddress} />
+                  </div>
                   <div className="text-sm break-all">
-                    {detail.stealthAddress}
+                    <code>{detail.stealthAddress}</code>
                   </div>
                 </div>
                 <Button

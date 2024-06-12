@@ -30,24 +30,16 @@ const WalletConnectSessions = ({
   }
 
   return (
-    <div className="flex flex-col w-full max-w-lg">
+    <div className="flex flex-col w-full">
       <ul className="space-y-4">
         {filteredSessions.map(session => (
           <li key={session.topic}>
-            <Card className="flex items-center p-4">
+            <Card className="flex items-center p-4 shadow-none">
               <div className="flex gap-4 items-center">
                 <AppAvatar imageSrc={session.peer.metadata.icons[0]} />
                 <div className="flex flex-col gap-2">
                   <CardTitle>{session.peer.metadata.name}</CardTitle>
                   <CardDescription>{session.peer.metadata.url}</CardDescription>
-                  <div className="">
-                    <div className="text-sm text-gray-500">Account</div>
-                    <code>
-                      {stripEip155Prefix(
-                        session.namespaces[EIP155].accounts[0]
-                      )}
-                    </code>
-                  </div>
                 </div>
               </div>
             </Card>
