@@ -1,8 +1,8 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { Button, Input } from '@/components/ui';
 import { useWalletConnect } from '@/contexts/walletconnect';
-import { useToast } from './ui/use-toast';
-import { Card } from './ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import { Card } from '@/components/ui/card';
 
 const ConnectViaWalletConnect = () => {
   const { toast } = useToast();
@@ -41,9 +41,8 @@ const ConnectViaWalletConnect = () => {
         setWalletConnectURI('');
         toast({
           title: 'Connected to Stealth Addresses Via WalletConnect',
-          description:
-            'Please go to app to start using your Stealth Addresses.',
-          duration: 5000
+          description: 'Please go to app to start using your Stealth Address.',
+          duration: 10000
         });
       } catch (error) {
         setWalletConnectURI('');
@@ -51,7 +50,7 @@ const ConnectViaWalletConnect = () => {
           title: 'Failed to connect',
           description: `Error: ${error}`,
           variant: 'destructive',
-          duration: 5000
+          duration: 10000
         });
       }
     };
@@ -63,25 +62,27 @@ const ConnectViaWalletConnect = () => {
   const handleInputBlur = () => setInputIsFocused(false);
 
   return (
-    <Card className="flex flex-col gap-4 p-4">
-      <div className="text-lg font-bold">
-        Connect dApps to Your Stealth Address
-      </div>
-      <p className="text-sm">
-        Paste the pairing code below to connect to your Stealth Address via
-        WalletConnect
-      </p>
-      <div className="flex w-full max-w-sm items-center space-x-2">
-        <Input
-          placeholder={inputIsFocused ? 'wc:' : 'Pairing code'}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          onChange={handleInputChange}
-          value={walletConnectURI}
-        />
-        <Button onClick={handlePasteClick}>Paste</Button>
-      </div>
-    </Card>
+    <div className="p-4">
+      <Card className="flex flex-col gap-4 p-4">
+        <div className="text-lg font-bold">
+          Connect Apps to Your Stealth Address
+        </div>
+        <p className="text-sm">
+          Paste the pairing code below to connect to your Stealth Address via
+          WalletConnect
+        </p>
+        <div className="flex w-full max-w-sm items-center space-x-2">
+          <Input
+            placeholder={inputIsFocused ? 'wc:' : 'Pairing code'}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            onChange={handleInputChange}
+            value={walletConnectURI}
+          />
+          <Button onClick={handlePasteClick}>Paste</Button>
+        </div>
+      </Card>
+    </div>
   );
 };
 
