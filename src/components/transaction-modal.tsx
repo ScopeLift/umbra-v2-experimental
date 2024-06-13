@@ -14,6 +14,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import useEtherscanTxUrl from '@/hooks/use-etherscan-tx-url';
 import { getStealthAddressFromSessionRequest } from '@/contexts/helpers/walletconnect-helpers';
+import type { Address } from 'viem';
+import { useEffect, useState } from 'react';
 
 const TransactionModal = () => {
   const {
@@ -27,6 +29,8 @@ const TransactionModal = () => {
 
   const { getStealthAddressWalletClient } = useAuth();
   const { toast } = useToast();
+
+  const [stealthAddress, setStealthAddress] = useState<Address | null>(null);
 
   const handleApprove = async (stealthAddress: `0x${string}`) => {
     const walletClient = getStealthAddressWalletClient(stealthAddress);
@@ -78,9 +82,13 @@ const TransactionModal = () => {
     });
   };
 
-  if (!sessionRequest) return null;
+  useEffect(() => {
+    if (sessionRequest) {
+      setStealthAddress(getStealthAddressFromSessionRequest(sessionRequest));
+    }
+  }, [sessionRequest]);
 
-  const stealthAddress = getStealthAddressFromSessionRequest(sessionRequest);
+  if (!sessionRequest) return null;
 
   return (
     <Dialog open={!!sessionRequest}>
@@ -108,8 +116,10 @@ const TransactionModal = () => {
             Reject
           </Button>
           <Button
-            onClick={() => handleApprove(stealthAddress)}
-            disabled={isApproveSessionRequestPending}
+            onClick={() =>
+              stealthAddress ? handleApprove(stealthAddress) : null
+            }
+            disabled={isApproveSessionRequestPending || !stealthAddress}
           >
             {isApproveSessionRequestPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

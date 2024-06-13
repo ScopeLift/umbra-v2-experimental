@@ -20,7 +20,6 @@ import { type WalletClient, createWalletClient, custom, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 import { useAccount, useChainId, useSignMessage } from 'wagmi';
-import { useWalletConnect } from './walletconnect';
 
 type AuthContextType = {
   keys: Keys | undefined;
@@ -56,8 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const { signMessageAsync } = useSignMessage();
-  const { setStealthAddress: setStealthAddressForWalletConnect } =
-    useWalletConnect();
   const MESSAGE_TO_SIGN = `Generate Stealth Meta-Address on ${chainId} chain`;
 
   const [stealthAddressDetails, setStealthAddressDetails] = useState<
@@ -96,7 +93,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const getStealthAddressWalletClient = useCallback(
     (stealthAddress: HexString) => {
       const stealthAddressDetail = stealthAddressDetails.find(
-        detail => detail.stealthAddress === stealthAddress
+        detail =>
+          detail.stealthAddress.toLowerCase() === stealthAddress.toLowerCase()
       );
 
       if (!stealthAddressDetail) {
@@ -108,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return createWalletClient({
         account: privateKeyToAccount(stealthAddressPrivateKey),
         chain: sepolia,
-        transport: http()
+        transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL)
       });
     },
     [stealthAddressDetails]
