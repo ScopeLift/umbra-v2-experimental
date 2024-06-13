@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth';
 import ConnectViaWalletConnect from '@/components/connect-via-walletconnect';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -14,6 +13,7 @@ import type { Address } from 'viem';
 import WalletConnectSessions from './walletconnect-sessions';
 import { useWalletConnect } from '@/contexts/walletconnect';
 import EthBalance from './eth-balance';
+import useSendEthWithFunder from '@/hooks/use-send-eth';
 
 const StealthAddressManager = () => {
   const { setSelectedStealthAddress: setSelectedStealthAddressForWC } =
@@ -24,6 +24,12 @@ const StealthAddressManager = () => {
     isLoadingStealthAddresses,
     needsAuth
   } = useAuth();
+  const {
+    batchSendEthUsingFunder,
+    isBatchFunding,
+    hasAttemptedFunding,
+    isFunded
+  } = useSendEthWithFunder();
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,6 +56,29 @@ const StealthAddressManager = () => {
     }
   }, [selectedAddress, setSelectedStealthAddressForWC]);
 
+  // fund all stealth addresses with .001 ETH on load
+  useEffect(() => {
+    (async () => {
+      if (
+        stealthAddressDetails.length > 0 &&
+        !isBatchFunding &&
+        !hasAttemptedFunding
+      ) {
+        const fundingData = stealthAddressDetails.map(detail => ({
+          to: detail.stealthAddress,
+          formattedValue: '0.001'
+        }));
+
+        await batchSendEthUsingFunder(fundingData);
+      }
+    })();
+  }, [
+    stealthAddressDetails,
+    batchSendEthUsingFunder,
+    isBatchFunding,
+    hasAttemptedFunding
+  ]);
+
   if (isLoadingStealthAddresses) {
     return <div>Loading stealth addresses...</div>;
   }
@@ -68,7 +97,11 @@ const StealthAddressManager = () => {
                 <div className="flex flex-col gap-2 text-left w-full md:w-auto">
                   <div className="flex gap-2 items-center">
                     <div className="font-bold">Stealth Address {index + 1}</div>
-                    <EthBalance address={detail.stealthAddress} />
+                    <EthBalance
+                      address={detail.stealthAddress}
+                      isLoading={isBatchFunding}
+                      shouldRefetch={isFunded}
+                    />
                   </div>
                   <div className="text-sm break-words">
                     <code>{detail.stealthAddress}</code>
