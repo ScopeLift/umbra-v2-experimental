@@ -55,27 +55,27 @@ const StealthAddressManager = () => {
   }
 
   return (
-    <>
-      <Accordion type="multiple" className="flex flex-col gap-4 w-full">
+    <div className="w-full lg:w-1/2">
+      <Accordion type="multiple" className="flex flex-col gap-2 w-full">
         {stealthAddressDetails.map((detail, index) => (
           <AccordionItem
             key={detail.stealthAddress}
             value={`item-${index}`}
             className="border-none hover:ring-1 ring-gray-500 rounded-md bg-gray-100 hover:cursor-pointer"
           >
-            <AccordionTrigger className="hover:no-underline p-8">
-              <div className="flex justify-between items-center w-full">
-                <div className="flex flex-col gap-2 text-left">
+            <AccordionTrigger className="hover:no-underline p-4 md:p-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full">
+                <div className="flex flex-col gap-2 text-left w-full md:w-auto">
                   <div className="flex gap-2 items-center">
                     <div className="font-bold">Stealth Address {index + 1}</div>
                     <EthBalance address={detail.stealthAddress} />
                   </div>
-                  <div className="text-sm break-all">
+                  <div className="text-sm break-words">
                     <code>{detail.stealthAddress}</code>
                   </div>
                 </div>
                 <Button
-                  className="mr-2"
+                  className="mt-2 md:mt-0 md:mr-2"
                   onClick={() => handleConnectClick(detail.stealthAddress)}
                 >
                   Connect to Apps
@@ -83,7 +83,7 @@ const StealthAddressManager = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="p-8">
+              <div className="p-4 md:p-8">
                 <WalletConnectSessions stealthAddress={detail.stealthAddress} />
               </div>
             </AccordionContent>
@@ -98,7 +98,7 @@ const StealthAddressManager = () => {
           </DialogContent>
         </Dialog>
       )}
-    </>
+    </div>
   );
 };
 

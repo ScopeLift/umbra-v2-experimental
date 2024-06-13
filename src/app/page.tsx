@@ -38,9 +38,7 @@ export default function Home() {
           </div>
         )}
       </nav>
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:gap-8 w-full">
-        {stealthMetaAddress && <StealthAddressManager />}
-      </div>
+      {stealthMetaAddress && <StealthAddressManager />}
       <TransactionModal />
     </main>
   );

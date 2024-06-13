@@ -33,14 +33,14 @@ const ConnectViaWalletConnect = () => {
 
     const connectToAddressViaWalletConnect = async () => {
       toast({
-        title: 'Connecting to Stealth Addresses Via WalletConnect...',
+        title: 'Connecting to Stealth Address Via WalletConnect...',
         description: 'Please wait while the connection is established.'
       });
       try {
         await connect({ uri: walletConnectURI });
         setWalletConnectURI('');
         toast({
-          title: 'Connected to Stealth Addresses Via WalletConnect',
+          title: 'Connected to Stealth Address Via WalletConnect',
           description: 'Please go to app to start using your Stealth Address.',
           duration: 10000
         });
