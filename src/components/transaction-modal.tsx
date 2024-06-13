@@ -13,6 +13,10 @@ import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import useEtherscanTxUrl from '@/hooks/use-etherscan-tx-url';
+import { getStealthAddressFromSessionRequest } from '@/contexts/helpers/walletconnect-helpers';
+import type { Address } from 'viem';
+import { useEffect, useState } from 'react';
+import { useBalance } from 'wagmi';
 
 const TransactionModal = () => {
   const {
@@ -20,7 +24,6 @@ const TransactionModal = () => {
     rejectSessionRequest,
     sessionRequest,
     sessionResponse,
-    stealthAddress,
     isApproveSessionRequestPending
   } = useWalletConnect();
   const etherscanTxLink = useEtherscanTxUrl(sessionResponse?.result);
@@ -28,13 +31,15 @@ const TransactionModal = () => {
   const { getStealthAddressWalletClient } = useAuth();
   const { toast } = useToast();
 
-  const handleApprove = async () => {
-    if (!stealthAddress) {
-      console.error('Stealth address not found during handle approve');
-      return;
-    }
+  const [stealthAddress, setStealthAddress] = useState<Address>();
 
+  const { refetch } = useBalance({
+    address: stealthAddress
+  });
+
+  const handleApprove = async (stealthAddress: `0x${string}`) => {
     const walletClient = getStealthAddressWalletClient(stealthAddress);
+
     if (!walletClient) {
       console.error('Wallet client not found during handle approve');
       return;
@@ -42,6 +47,7 @@ const TransactionModal = () => {
 
     try {
       await approveSessionRequest(walletClient);
+      refetch();
       toast({
         title: 'Transaction Success',
         description: 'Your transaction was successfull.',
@@ -82,7 +88,14 @@ const TransactionModal = () => {
     });
   };
 
+  useEffect(() => {
+    if (sessionRequest) {
+      setStealthAddress(getStealthAddressFromSessionRequest(sessionRequest));
+    }
+  }, [sessionRequest]);
+
   if (!sessionRequest) return null;
+
   return (
     <Dialog open={!!sessionRequest}>
       <DialogContent className="max-w-lg mx-auto p-6">
@@ -109,8 +122,10 @@ const TransactionModal = () => {
             Reject
           </Button>
           <Button
-            onClick={handleApprove}
-            disabled={isApproveSessionRequestPending}
+            onClick={() =>
+              stealthAddress ? handleApprove(stealthAddress) : null
+            }
+            disabled={isApproveSessionRequestPending || !stealthAddress}
           >
             {isApproveSessionRequestPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

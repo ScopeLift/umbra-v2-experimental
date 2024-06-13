@@ -20,13 +20,11 @@ import { type WalletClient, createWalletClient, custom, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 import { useAccount, useChainId, useSignMessage } from 'wagmi';
-import { useWalletConnect } from './walletconnect';
 
 type AuthContextType = {
   keys: Keys | undefined;
   stealthMetaAddress: HexString | undefined;
   handleSignMessage: () => Promise<void>;
-  handleGenerateStealthAddress: () => Promise<void>;
   stealthAddressDetails: StealthAddressDetails[];
   needsAuth: boolean;
   getStealthAddressWalletClient: (
@@ -35,6 +33,8 @@ type AuthContextType = {
   getStealthAddressDetails: (
     stealthAddress: HexString
   ) => StealthAddressDetails | undefined;
+  isLoadingStealthAddresses: boolean;
+  generateMultipleStealthAddresses: () => Promise<void>;
 };
 
 type Keys = {
@@ -55,8 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const { signMessageAsync } = useSignMessage();
-  const { setStealthAddress: setStealthAddressForWalletConnect } =
-    useWalletConnect();
   const MESSAGE_TO_SIGN = `Generate Stealth Meta-Address on ${chainId} chain`;
 
   const [stealthAddressDetails, setStealthAddressDetails] = useState<
@@ -64,6 +62,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   >([]);
   const [stealthMetaAddress, setStealthMetaAddress] = useState<HexString>();
   const [keys, setKeys] = useState<Keys>();
+  const [isLoadingStealthAddresses, setIsLoadingStealthAddresses] =
+    useState(false);
 
   const handleSignMessage = useCallback(async () => {
     const signature = await signMessageAsync({ message: MESSAGE_TO_SIGN });
@@ -80,26 +80,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     ({
       ephemeralPublicKey,
       keys
-    }: { ephemeralPublicKey: HexString; keys: Keys }) => {
-      if (!keys) {
-        console.error('Keys not set');
-        return undefined;
-      }
-
-      return computeStealthKey({
+    }: { ephemeralPublicKey: HexString; keys: Keys }) =>
+      computeStealthKey({
         schemeId: VALID_SCHEME_ID.SCHEME_ID_1,
         ephemeralPublicKey,
         spendingPrivateKey: keys.spendingPrivateKey,
         viewingPrivateKey: keys.viewingPrivateKey
-      });
-    },
+      }),
     []
   );
 
   const getStealthAddressWalletClient = useCallback(
     (stealthAddress: HexString) => {
       const stealthAddressDetail = stealthAddressDetails.find(
-        detail => detail.stealthAddress === stealthAddress
+        detail =>
+          detail.stealthAddress.toLowerCase() === stealthAddress.toLowerCase()
       );
 
       if (!stealthAddressDetail) {
@@ -111,54 +106,67 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return createWalletClient({
         account: privateKeyToAccount(stealthAddressPrivateKey),
         chain: sepolia,
-        transport: http()
+        transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL)
       });
     },
     [stealthAddressDetails]
   );
 
-  const handleGenerateStealthAddress = useCallback(async () => {
+  const generateMultipleStealthAddresses = useCallback(async () => {
+    const STEALTH_ADDRESS_COUNT = 5;
+
     if (!stealthMetaAddress) {
       console.error('Stealth Meta-Address is not set');
       return;
     }
-    const stealthAddressResults = generateStealthAddress({
-      stealthMetaAddressURI: stealthMetaAddress
-    });
 
     if (!keys) {
-      console.error('Keys not set');
+      console.error('Keys are not set');
       return;
     }
 
-    const privateKey = getStealthAddressPrivateKey({
-      ephemeralPublicKey: stealthAddressResults.ephemeralPublicKey,
-      keys
-    });
+    setIsLoadingStealthAddresses(true);
 
-    if (!privateKey) {
-      console.error('Private key not found');
-      return;
-    }
+    const generatedAddressesDetails = await Array.from({
+      length: STEALTH_ADDRESS_COUNT
+    }).reduce(async (accPromise: Promise<StealthAddressDetails[]>, _value) => {
+      const acc = await accPromise;
 
-    const stealthAddressDetails = {
-      stealthAddressPrivateKey: privateKey,
-      stealthAddressWalletClient: createWalletClient({
-        account: privateKeyToAccount(privateKey),
-        chain: sepolia,
-        transport: custom(window.ethereum)
-      }),
-      ...stealthAddressResults
-    };
+      const stealthAddressResults = generateStealthAddress({
+        stealthMetaAddressURI: stealthMetaAddress
+      });
 
-    setStealthAddressDetails(prev => [...prev, stealthAddressDetails]);
-    setStealthAddressForWalletConnect(stealthAddressResults.stealthAddress);
-  }, [
-    stealthMetaAddress,
-    keys,
-    getStealthAddressPrivateKey,
-    setStealthAddressForWalletConnect
-  ]);
+      if (!keys) {
+        console.error('Keys not set');
+        return acc;
+      }
+
+      const privateKey = getStealthAddressPrivateKey({
+        ephemeralPublicKey: stealthAddressResults.ephemeralPublicKey,
+        keys
+      });
+
+      if (!privateKey) {
+        console.error('Private key not found');
+        return acc;
+      }
+
+      const addressDetail = {
+        stealthAddressPrivateKey: privateKey,
+        stealthAddressWalletClient: createWalletClient({
+          account: privateKeyToAccount(privateKey),
+          chain: sepolia,
+          transport: custom(window.ethereum)
+        }),
+        ...stealthAddressResults
+      };
+
+      return [...acc, addressDetail];
+    }, Promise.resolve([]));
+
+    setStealthAddressDetails(generatedAddressesDetails);
+    setIsLoadingStealthAddresses(false);
+  }, [stealthMetaAddress, keys, getStealthAddressPrivateKey]);
 
   const getStealthAddressDetails = useCallback(
     (stealthAddress: HexString) =>
@@ -176,11 +184,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         keys,
         stealthMetaAddress,
         handleSignMessage,
-        handleGenerateStealthAddress,
         stealthAddressDetails,
         needsAuth,
         getStealthAddressWalletClient,
-        getStealthAddressDetails
+        getStealthAddressDetails,
+        isLoadingStealthAddresses,
+        generateMultipleStealthAddresses
       }}
     >
       {children}

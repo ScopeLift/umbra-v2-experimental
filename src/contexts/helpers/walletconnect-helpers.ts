@@ -150,3 +150,9 @@ function formatTransactionForViem(transaction: {
   };
   return formattedTransaction;
 }
+
+export function getStealthAddressFromSessionRequest(
+  sessionRequest: Web3WalletTypes.SessionRequest
+): `0x${string}` {
+  return sessionRequest.params.request.params[0].from as `0x${string}`;
+}
