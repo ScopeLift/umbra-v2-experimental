@@ -16,6 +16,7 @@ import useEtherscanTxUrl from '@/hooks/use-etherscan-tx-url';
 import { getStealthAddressFromSessionRequest } from '@/contexts/helpers/walletconnect-helpers';
 import type { Address } from 'viem';
 import { useEffect, useState } from 'react';
+import { useBalance } from 'wagmi';
 
 const TransactionModal = () => {
   const {
@@ -30,7 +31,11 @@ const TransactionModal = () => {
   const { getStealthAddressWalletClient } = useAuth();
   const { toast } = useToast();
 
-  const [stealthAddress, setStealthAddress] = useState<Address | null>(null);
+  const [stealthAddress, setStealthAddress] = useState<Address>();
+
+  const { refetch } = useBalance({
+    address: stealthAddress
+  });
 
   const handleApprove = async (stealthAddress: `0x${string}`) => {
     const walletClient = getStealthAddressWalletClient(stealthAddress);
@@ -42,6 +47,7 @@ const TransactionModal = () => {
 
     try {
       await approveSessionRequest(walletClient);
+      refetch();
       toast({
         title: 'Transaction Success',
         description: 'Your transaction was successfull.',
