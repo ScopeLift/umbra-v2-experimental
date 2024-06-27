@@ -37,8 +37,8 @@ To facilitate the purpose, the prototype includes these supporting features:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/marcomariscal/umbra-v2-experimental-deploy.git
-   cd umbra-v2-experimental-deploy
+   git clone https://github.com/ScopeLift/umbra-v2-experimental.git
+   cd umbra-v2-experimental
    ```
 
 2. Install dependencies:
