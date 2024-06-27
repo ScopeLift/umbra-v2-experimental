@@ -2,7 +2,7 @@
 
 ## Overview
 
-This prototype demonstrates a key feature of Umbra V2: the ability to connect stealth addresses to any decentralized application (dApp), in this case, using WalletConnect. By showcasing this functionality, the prototype illustrates how Umbra V2 enhances privacy and interoperability in the Ethereum ecosystem. To learn more about Umbra V2, please see the blog post [here](https://scopelift.co/blog/introducing-umbra-v2-architecture).
+This prototype demonstrates a key feature of Umbra V2: the ability to connect stealth addresses to any decentralized application (dApp), in this case, using WalletConnect. By showcasing this functionality, the prototype illustrates how Umbra V2 enhances interoperability in the Ethereum ecosystem. To learn more about Umbra V2, please see the blog post [here](https://scopelift.co/blog/introducing-umbra-v2-architecture).
 
 ## Purpose
 
