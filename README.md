@@ -52,7 +52,7 @@ To facilitate the purpose, the prototype includes these supporting features:
    Using Yarn:
 
    ```bash
-   yarn install
+   yarn
    ```
 
    Using Bun:
