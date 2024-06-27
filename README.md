@@ -88,7 +88,7 @@ To facilitate the purpose, the prototype includes these supporting features:
    Using Bun:
 
    ```bash
-   bun run dev
+   bun dev
    ```
 
 ## Usage
