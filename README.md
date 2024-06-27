@@ -20,7 +20,7 @@ To facilitate the purpose, the prototype includes these supporting features:
 2. Funding of stealth addresses (for demonstration purposes)
 3. Display of ETH balance for stealth addresses (to show changes in balance after performing a transaction using the stealth address via the connected dApp)
 4. Management of WalletConnect sessions for each stealth address
-5. Handling approving/rejecting transaction requests made by a user from a connected dApp
+5. Handle approving/rejecting transaction requests made by a user from a connected dApp
 
 ## Technologies Used
 
