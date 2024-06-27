@@ -2,7 +2,7 @@
 
 ## Overview
 
-This prototype demonstrates a key feature of Umbra V2: the ability to connect stealth addresses to any decentralized application (dApp), in this case, using WalletConnect. By showcasing this functionality, the prototype illustrates how Umbra V2 enhances privacy and interoperability in the Ethereum ecosystem. To learn more about Umbra V2, please see the blog post [here](https://scopelift.co/blog/introducing-umbra-v2-architecture).
+This prototype demonstrates a key feature of Umbra V2: the ability to connect stealth addresses to any decentralized application (dApp), in this case, using WalletConnect. By showcasing this functionality, the prototype illustrates how Umbra V2 enhances interoperability in the Ethereum ecosystem. To learn more about Umbra V2, please see the blog post [here](https://scopelift.co/blog/introducing-umbra-v2-architecture).
 
 ## Purpose
 
@@ -20,7 +20,7 @@ To facilitate the purpose, the prototype includes these supporting features:
 2. Funding of stealth addresses (for demonstration purposes)
 3. Display of ETH balance for stealth addresses (to show changes in balance after performing a transaction using the stealth address via the connected dApp)
 4. Management of WalletConnect sessions for each stealth address
-5. Handling approving/rejecting transaction requests made by a user from a connected dApp
+5. Handle approving/rejecting transaction requests made by a user from a connected dApp
 
 ## Technologies Used
 
@@ -30,15 +30,15 @@ To facilitate the purpose, the prototype includes these supporting features:
 - Viem
 - WalletConnect
 - Wagmi
-- ShadCN UI components
+- shadcn/ui components
 
 ## Setup Instructions
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/marcomariscal/umbra-v2-experimental-deploy.git
-   cd umbra-v2-experimental-deploy
+   git clone https://github.com/ScopeLift/umbra-v2-experimental.git
+   cd umbra-v2-experimental
    ```
 
 2. Install dependencies:
@@ -52,7 +52,7 @@ To facilitate the purpose, the prototype includes these supporting features:
    Using Yarn:
 
    ```bash
-   yarn install
+   yarn
    ```
 
    Using Bun:
@@ -88,7 +88,7 @@ To facilitate the purpose, the prototype includes these supporting features:
    Using Bun:
 
    ```bash
-   bun run dev
+   bun dev
    ```
 
 ## Usage
