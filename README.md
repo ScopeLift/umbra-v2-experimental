@@ -30,7 +30,7 @@ To facilitate the purpose, the prototype includes these supporting features:
 - Viem
 - WalletConnect
 - Wagmi
-- ShadCN UI components
+- shadcn/ui components
 
 ## Setup Instructions
 
