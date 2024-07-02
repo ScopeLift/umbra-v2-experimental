@@ -15,6 +15,8 @@ import { useWalletConnect } from '@/contexts/walletconnect';
 import EthBalance from './eth-balance';
 import useSendEthWithFunder from '@/hooks/use-send-eth';
 
+const ETH_FUNDING_AMOUNT = '0.001';
+
 const StealthAddressManager = () => {
   const { setSelectedStealthAddress: setSelectedStealthAddressForWC } =
     useWalletConnect();
@@ -66,7 +68,7 @@ const StealthAddressManager = () => {
       ) {
         const fundingData = stealthAddressDetails.map(detail => ({
           to: detail.stealthAddress,
-          formattedValue: '0.001'
+          formattedValue: ETH_FUNDING_AMOUNT
         }));
 
         await batchSendEthUsingFunder(fundingData);
