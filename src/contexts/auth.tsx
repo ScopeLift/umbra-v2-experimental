@@ -51,6 +51,8 @@ type StealthAddressDetails = GenerateStealthAddressReturnType & {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const STEALTH_ADDRESS_COUNT = 3;
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { isConnected } = useAccount();
   const chainId = useChainId();
@@ -113,8 +115,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const generateMultipleStealthAddresses = useCallback(async () => {
-    const STEALTH_ADDRESS_COUNT = 5;
-
     if (!stealthMetaAddress) {
       console.error('Stealth Meta-Address is not set');
       return;
